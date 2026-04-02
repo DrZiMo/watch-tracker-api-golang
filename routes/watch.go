@@ -2,13 +2,7 @@ package routes
 
 import "github.com/gin-gonic/gin"
 
-func RegisterServer(server *gin.Engine) {
-	// Auth
-	server.GET("/auth")
-	server.POST("/auth/login")
-	server.POST("/auth/create")
-
-	// Watch
+func WatchRoute(server *gin.Engine) {
 	server.GET("/watches")
 	server.GET("/watch/:id")
 	server.GET("/watch/user/:id")
