@@ -10,7 +10,8 @@ import (
 var DB *sql.DB
 
 func InitDB() {
-	DB, err := sql.Open("sqlite", "api.db")
+	var err error
+	DB, err = sql.Open("sqlite", "api.db")
 
 	if err != nil {
 		panic(err)

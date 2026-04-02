@@ -1,13 +1,18 @@
 package models
 
-import "github.com/DrZiMo/watch-tracker-api-golang/db"
+import (
+	"time"
+
+	"github.com/DrZiMo/watch-tracker-api-golang/db"
+	"github.com/DrZiMo/watch-tracker-api-golang/utils"
+)
 
 type User struct {
 	ID        int64
 	Name      string `binding:"required"`
 	Email     string `binding:"required"`
 	Password  string `binding:"required"`
-	LastLogin string `binding:"required"`
+	LastLogin string
 }
 
 func GetUsers() ([]User, error) {
@@ -34,4 +39,44 @@ func GetUsers() ([]User, error) {
 	}
 
 	return users, nil
+}
+
+func (u *User) Create() error {
+	query := `
+	INSERT INTO users (name, email, password, last_login)
+	VALUES (?, ?, ?, ?)
+	`
+
+	stmt, err := db.DB.Prepare(query)
+
+	if err != nil {
+		return err
+	}
+
+	defer stmt.Close()
+
+	hashedPass, err := utils.HashPassword(u.Password)
+
+	if err != nil {
+		return err
+	}
+
+	timeNow := time.Now().Format(time.RFC3339)
+	result, err := stmt.Exec(u.Name, u.Email, hashedPass, timeNow)
+
+	if err != nil {
+		return err
+	}
+
+	userId, err := result.LastInsertId()
+
+	if err != nil {
+		return err
+	}
+
+	u.ID = userId
+	u.Password = hashedPass
+	u.LastLogin = timeNow
+
+	return nil
 }

@@ -32,5 +32,34 @@ func LoginUser(c *gin.Context) {
 }
 
 func CreateUser(c *gin.Context) {
-	c.JSON(http.StatusAccepted, gin.H{"users": "suli"})
+	var user models.User
+	err := c.ShouldBindJSON(&user)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"ok":      false,
+			"message": "Couldn't parse requested data",
+			"err":     err.Error(),
+		})
+
+		return
+	}
+
+	err = user.Create()
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"ok":      false,
+			"message": "Couldn't fetch users",
+			"err":     err.Error(),
+		})
+
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"ok":      false,
+		"message": "User created successfully",
+		"user":    user,
+	})
 }
