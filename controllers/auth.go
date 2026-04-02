@@ -29,7 +29,49 @@ func GetAllUsers(c *gin.Context) {
 }
 
 func LoginUser(c *gin.Context) {
-	c.JSON(http.StatusAccepted, gin.H{"users": "suli"})
+	var user models.User
+	err := c.ShouldBindJSON(&user)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"ok":      false,
+			"message": "Couldn't parse requested data",
+			"err":     err.Error(),
+		})
+
+		return
+	}
+
+	err = user.Login()
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"ok":      false,
+			"message": "Couldn't login users",
+			"err":     err.Error(),
+		})
+
+		return
+	}
+
+	token, err := utils.GenerateToke(user.ID)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"ok":      false,
+			"message": "Failed to generate token",
+			"err":     err.Error(),
+		})
+
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"ok":      true,
+		"message": "User logged in successfully",
+		"user":    user,
+		"token":   token,
+	})
 }
 
 func CreateUser(c *gin.Context) {
@@ -71,7 +113,7 @@ func CreateUser(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
-		"ok":      false,
+		"ok":      true,
 		"message": "User created successfully",
 		"user":    user,
 		"token":   token,

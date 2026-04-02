@@ -1,6 +1,7 @@
 package models
 
 import (
+	"errors"
 	"time"
 
 	"github.com/DrZiMo/watch-tracker-api-golang/db"
@@ -39,6 +40,26 @@ func GetUsers() ([]User, error) {
 	}
 
 	return users, nil
+}
+
+func (u *User) Login() error {
+	query := `SELECT password FROM users WHERE email = ?`
+	row := db.DB.QueryRow(query, u.Email)
+
+	var retrivedPass string
+	err := row.Scan(&u.Password)
+
+	if err != nil {
+		return err
+	}
+
+	validPassword := utils.ValidatePassword(u.Password, retrivedPass)
+
+	if !validPassword {
+		return errors.New("Credentials invalid")
+	}
+
+	return nil
 }
 
 func (u *User) Create() error {
