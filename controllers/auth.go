@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/DrZiMo/watch-tracker-api-golang/models"
+	"github.com/DrZiMo/watch-tracker-api-golang/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -50,7 +51,19 @@ func CreateUser(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"ok":      false,
-			"message": "Couldn't fetch users",
+			"message": "Couldn't create users",
+			"err":     err.Error(),
+		})
+
+		return
+	}
+
+	token, err := utils.GenerateToke(user.ID)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"ok":      false,
+			"message": "Failed to generate token",
 			"err":     err.Error(),
 		})
 
@@ -61,5 +74,6 @@ func CreateUser(c *gin.Context) {
 		"ok":      false,
 		"message": "User created successfully",
 		"user":    user,
+		"token":   token,
 	})
 }
