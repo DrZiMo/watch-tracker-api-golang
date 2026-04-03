@@ -33,7 +33,39 @@ func GetUserWatch() {
 
 }
 
-func CreateWatch() {
+func CreateWatch(c *gin.Context) {
+	var watch models.Watch
+	err := c.ShouldBindJSON(&watch)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"ok":      false,
+			"message": "Couldn't parse requested data",
+			"err":     err.Error(),
+		})
+
+		return
+	}
+
+	userId := c.GetInt64("userId")
+
+	err = watch.Create(userId)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"ok":      false,
+			"message": "Couldn't create watch",
+			"err":     err.Error(),
+		})
+
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"ok":      true,
+		"message": "Created watch successfully",
+		"watch":   watch,
+	})
 
 }
 
