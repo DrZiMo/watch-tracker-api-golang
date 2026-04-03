@@ -51,6 +51,45 @@ func GetWatches() ([]Watch, error) {
 	return watches, nil
 }
 
+func GetWatchByID(watchId int64) (*Watch, error) {
+	query := `SELECT * FROM watches WHERE id = ?`
+	row := db.DB.QueryRow(query, watchId)
+
+	var watch Watch
+	err := row.Scan(&watch.ID, &watch.Name, &watch.Status, &watch.Rating, &watch.UserId, &watch.CreatedAt, &watch.UpdatedAt)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &watch, nil
+}
+
+func GetUserWatch(userId int64) ([]Watch, error) {
+	query := `SELECT * FROM watches WHERE user_id = ?`
+	rows, err := db.DB.Query(query, userId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var watches []Watch
+	for rows.Next() {
+		var watch Watch
+		err := rows.Scan(&watch.ID, &watch.Name, &watch.Status, &watch.Rating, &watch.UserId, &watch.CreatedAt, &watch.UpdatedAt)
+
+		if err != nil {
+			return nil, err
+		}
+
+		watches = append(watches, watch)
+	}
+
+	return watches, nil
+}
+
 func (w *Watch) Create(userId int64) error {
 	query := `
 	INSERT INTO watches (name, status, rating, user_id)
@@ -78,6 +117,50 @@ func (w *Watch) Create(userId int64) error {
 
 	w.ID = watchId
 	w.UserId = userId
+
+	return nil
+}
+
+func (w Watch) Update(watchId int64) error {
+	query := `
+	UPDATE users
+	SET name = ?, status = ?, rating = ?
+	WHERE id = ?
+	`
+
+	stmt, err := db.DB.Prepare(query)
+
+	if err != nil {
+		return err
+	}
+
+	defer stmt.Close()
+
+	_, err = stmt.Exec(w.Name, w.Status, w.Rating, watchId)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func Delete(watchId int64) error {
+	query := `DELETE FROM watches WHERE id = ?`
+
+	stmt, err := db.DB.Prepare(query)
+
+	if err != nil {
+		return err
+	}
+
+	defer stmt.Close()
+
+	_, err = stmt.Exec(watchId)
+
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
