@@ -46,11 +46,11 @@ func GetUsers() ([]User, error) {
 }
 
 func (u *User) Login() error {
-	query := `SELECT id, name, password, last_login FROM users WHERE email = ?`
+	query := `SELECT id, name, password, last_login, created_at, updated_at FROM users WHERE email = ?`
 	row := db.DB.QueryRow(query, u.Email)
 
 	var retrivedPass string
-	err := row.Scan(&u.ID, &u.Name, &retrivedPass, &u.LastLogin)
+	err := row.Scan(&u.ID, &u.Name, &retrivedPass, &u.LastLogin, &u.CreatedAt, &u.UpdatedAt)
 
 	if err != nil {
 		return err
