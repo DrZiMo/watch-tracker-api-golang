@@ -14,6 +14,9 @@ type User struct {
 	Email     string `binding:"required"`
 	Password  string `binding:"required"`
 	LastLogin string
+
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 func GetUsers() ([]User, error) {
@@ -30,7 +33,7 @@ func GetUsers() ([]User, error) {
 	var users []User
 	for rows.Next() {
 		var user User
-		err := rows.Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.LastLogin)
+		err := rows.Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.LastLogin, &user.CreatedAt, &user.UpdatedAt)
 
 		if err != nil {
 			return nil, err
@@ -43,11 +46,11 @@ func GetUsers() ([]User, error) {
 }
 
 func (u *User) Login() error {
-	query := `SELECT id, password, last_login FROM users WHERE email = ?`
+	query := `SELECT id, name, password, last_login FROM users WHERE email = ?`
 	row := db.DB.QueryRow(query, u.Email)
 
 	var retrivedPass string
-	err := row.Scan(&u.ID, &retrivedPass, &u.LastLogin)
+	err := row.Scan(&u.ID, &u.Name, &retrivedPass, &u.LastLogin)
 
 	if err != nil {
 		return err
