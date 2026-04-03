@@ -123,7 +123,7 @@ func (w *Watch) Create(userId int64) error {
 
 func (w Watch) Update(watchId int64) error {
 	query := `
-	UPDATE users
+	UPDATE watches
 	SET name = ?, status = ?, rating = ?
 	WHERE id = ?
 	`
