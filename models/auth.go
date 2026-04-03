@@ -43,17 +43,17 @@ func GetUsers() ([]User, error) {
 }
 
 func (u *User) Login() error {
-	query := `SELECT password FROM users WHERE email = ?`
+	query := `SELECT id, password, last_login FROM users WHERE email = ?`
 	row := db.DB.QueryRow(query, u.Email)
 
 	var retrivedPass string
-	err := row.Scan(&u.Password)
+	err := row.Scan(&u.ID, &retrivedPass, &u.LastLogin)
 
 	if err != nil {
 		return err
 	}
 
-	validPassword := utils.ValidatePassword(u.Password, retrivedPass)
+	validPassword := utils.CheckPassword(u.Password, retrivedPass)
 
 	if !validPassword {
 		return errors.New("Credentials invalid")

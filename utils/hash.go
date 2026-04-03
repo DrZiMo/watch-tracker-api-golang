@@ -12,7 +12,7 @@ func HashPassword(password string) (string, error) {
 	return string(hashedPass), nil
 }
 
-func ValidatePassword(password, hashedPassword string) bool {
+func CheckPassword(password, hashedPassword string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 	return err == nil
 }
